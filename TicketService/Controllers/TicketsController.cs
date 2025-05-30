@@ -129,7 +129,35 @@ namespace TicketService.Controllers
                 Price = ticket.Price
             });
         }
+        // DELETE: api/tickets/{id}
+        [HttpDelete("{id}")]
+        public async Task<ActionResult> DeleteTicket(Guid id)
+        {
+            var userId = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+            if (userId == null)
+            {
+                return Unauthorized();
+            }
 
+            var ticket = await _context.Tickets
+                .FirstOrDefaultAsync(t => t.Id == id && t.UserId == Guid.Parse(userId));
+
+            if (ticket == null)
+            {
+                return NotFound();
+            }
+
+            // Endast tillåt borttagning av aktiva biljetter
+            if (ticket.Status != "Active")
+            {
+                return BadRequest("Endast aktiva biljetter kan tas bort");
+            }
+
+            _context.Tickets.Remove(ticket);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
         // GET: api/tickets/qr/{ticketId}
         [HttpGet("qr/{ticketId}")]
         [AllowAnonymous]
