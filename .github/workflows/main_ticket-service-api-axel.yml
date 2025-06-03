@@ -62,12 +62,3 @@ jobs:
           app-name: 'ticket-service-api-axel'
           slot-name: 'Production'
           package: .
-
-      - name: Deploy to Azure Web App
-        id: deploy-to-webapp
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'ticket-service-api-axel'
-          slot-name: 'Production'
-          package: .
-          
