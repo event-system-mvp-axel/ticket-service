@@ -24,13 +24,13 @@ jobs:
         run: dotnet build ticketservice/ticketservice.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish ticketservice/ticketservice.csproj --configuration Release --output ${{env.DOTNET_ROOT}}/myapp
+        run: dotnet publish ticketservice/ticketservice.csproj --configuration Release --output ./publish_output # 🔧 fix här
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ./publish_output # 🔧 fix här
 
   deploy:
     runs-on: windows-latest
@@ -61,4 +61,4 @@ jobs:
         with:
           app-name: 'ticket-service-api-axel'
           slot-name: 'Production'
-          package: .
+          package: . # Detta är OK om `package: .` pekar på rätt katalog (./publish_output)
