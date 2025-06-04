@@ -78,11 +78,12 @@ builder.Services.AddAuthentication(options =>
 // Add CORS
 builder.Services.AddCors(options =>
 {
-    options.AddDefaultPolicy(builder =>
+    options.AddDefaultPolicy(policy =>
     {
-        builder.AllowAnyOrigin()
-               .AllowAnyMethod()
-               .AllowAnyHeader();
+        policy.WithOrigins("https://calm-pebble-0c29bef03.6.azurestaticapps.net")
+              .AllowAnyMethod()
+              .AllowAnyHeader()
+              .AllowCredentials();
     });
 });
 
@@ -113,7 +114,32 @@ app.MapGet("/", () => "Service is healthy");
 using (var scope = app.Services.CreateScope())
 {
     var context = scope.ServiceProvider.GetRequiredService<TicketContext>();
-    context.Database.EnsureCreated();
+
+    try
+    {
+        context.Database.EnsureCreated();
+
+        //skapa manu
+        context.Database.ExecuteSqlRaw(@"
+            IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Tickets' AND xtype='U')
+            CREATE TABLE Tickets (
+                Id uniqueidentifier PRIMARY KEY,
+                EventId uniqueidentifier NOT NULL,
+                UserId uniqueidentifier NOT NULL,
+                Price decimal(18,2) NOT NULL,
+                PurchaseDate datetime2 NOT NULL,
+                QRCode nvarchar(max),
+                Status nvarchar(50) NOT NULL,
+                CreatedAt datetime2 NOT NULL,
+                UpdatedAt datetime2 NOT NULL
+            )");
+
+        Console.WriteLine("Ticket database setup completed!");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Database setup error: {ex.Message}");
+    }
 }
 
 app.Run();
