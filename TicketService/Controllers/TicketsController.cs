@@ -39,8 +39,8 @@ namespace TicketService.Controllers
                 return Unauthorized();
             }
 
-            // Check if event exists (would normally call Event Service)
-            // For MVP, we'll skip this check
+            // Check if event exists 
+            
 
             var ticket = new Ticket
             {
